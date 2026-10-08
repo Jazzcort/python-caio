@@ -3,7 +3,7 @@
 Name:           python-caio
 Version:        0.12.4
 Release:        %autorelease
-Summary:        Asynchronous file IO for Linux MacOS or Windows.
+Summary:        Asynchronous file IO for Linux, MacOS or Windows
 
 License:        Apache-2.0
 URL:            https://github.com/mosquito/caio/
@@ -27,8 +27,8 @@ BuildRequires:  python3-pytest-rerunfailures
 caio is a Python library providing asynchronous file operations with support for
 multiple high-performance backends. It automatically selects the best available
 implementation for the operating system—including Linux io_uring, Linux kernel
-AIO, POSIX thread-based AIO, and a pure-Python fallback—and integrates seamlessly
-with Python's asyncio event loop.}
+AIO, POSIX thread-based AIO, and a pure-Python fallback—and integrates 
+seamlessly with Python's asyncio event loop.}
 
 %description %_description
 
@@ -48,7 +48,14 @@ Summary:        %{summary}
 
 %install
 %pyproject_install
+
+# Clean up leftover C sources and headers from site-packages
+find %{buildroot}%{python3_sitearch}/caio -type f \( -name "*.c" -o -name "*.h" \) -delete
+
 %pyproject_save_files -l caio
+
+# Strip any .c or .h entries from the generated pyproject file list
+sed -i '/\.[ch]$/d' %{pyproject_files}
 
 %check
 # caio.linux_uring calls io_uring_setup() on import, which is blocked by 
@@ -56,7 +63,7 @@ Summary:        %{summary}
 %pyproject_check_import -e 'caio.linux_uring*'
 
 # Copy tests to a subdirectory and run pytest from there so Python imports
-# the fully compiled package from %{buildroot} instead of the raw source tree.
+# the fully compiled package from buildroot instead of the raw source tree.
 mkdir -p _check
 cp -r tests _check/
 cd _check
